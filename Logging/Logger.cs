@@ -25,11 +25,11 @@ namespace Agile.Diagnostics.Logging
         public static string GetStandardFormatMessage(string message, LogLevel level, LogCategory category)
         {
             var cat = (category != null) ? category.Abbreviation ?? string.Empty : string.Empty;
-            return string.Format("{2} [{1}][{3}] {0}"
+            return string.Format("{2} [{1}:{3}] {0}"
                 , message ?? string.Empty
-                , level
+                , level.ToString().PadLeft(5, ' ')
                 , GetDateString(DateTime.Now)
-                , cat);
+                , cat); // can't add Thread Id because not availabel in Portable (well, can if really want, but in a version that is not part of a pcl.)
         }
 
         public static string GetDateString (DateTime date)
@@ -159,14 +159,23 @@ namespace Agile.Diagnostics.Logging
 
         public static void Error(Exception ex, string extraMessage, params object[] args)
         {
-            var exTypeName = (ex == null) 
-                ? "Exception is Null" : ex.GetType().Name;
-            var message = (ex == null) 
-                ? "Exception is Null" : ex.Message;
-            
-            Write(string.Format("[{0}][{1}]{2}", exTypeName, extraMessage, message)
+            if (ex == null)
+            {
+                Write(string.Format("[noType][{0}] ex is null", extraMessage)
                 , LogLevel.Error, LogCategory.Exception
-                , ex == null ? null : ex.GetType()
+                , null
+                , args);
+                return;
+            }
+            var exTypeName = ex.GetType().Name;
+            var message = ex.Message;
+            var stack = string.IsNullOrEmpty(ex.StackTrace)
+                ? ""
+                : string.Format("\r\n{0}", ex.StackTrace);
+            
+            Write(string.Format("[{0}][{1}]{2}{3}", exTypeName, extraMessage, message, stack)
+                , LogLevel.Error, LogCategory.Exception
+                , ex.GetType()
                 , args);
             // now log all inner exceptions
             if(ex != null)
@@ -178,7 +187,11 @@ namespace Agile.Diagnostics.Logging
             if (ex == null)
                 return;
 
-            Write(string.Format(" [{0}]{1}", ex.GetType().Name, ex.Message)
+            var stack = string.IsNullOrEmpty(ex.StackTrace)
+                ? ""
+                : string.Format("\r\n{0}", ex.StackTrace);
+
+            Write(string.Format(" [{0}]{1}{2}", ex.GetType().Name, ex.Message, stack)
                 , LogLevel.Error, LogCategory.Exception, null);
 
             count++;
