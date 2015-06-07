@@ -93,7 +93,7 @@ namespace Agile.Diagnostics.Logging
 
         public static bool HasInitializeBeenCalled { get; set; }
 
-        public static void InitializeLogging(IList<ILogger> loggers, LogLevel includedLogLevels, bool logCount = true)
+        public static void InitializeLogging(List<ILogger> loggers, LogLevel includedLogLevels, bool logCount = true)
         {
             HasInitializeBeenCalled = true;
             AllLoggers.Clear();
