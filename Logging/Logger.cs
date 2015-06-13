@@ -179,7 +179,7 @@ namespace Agile.Diagnostics.Logging
                 , ex.GetType()
                 , args);
             // now log all inner exceptions
-            if(ex != null)
+            if(ex.InnerException != null)
                 LogInnerExceptions(ex.InnerException, 1);
         }
 
