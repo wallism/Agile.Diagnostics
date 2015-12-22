@@ -26,11 +26,14 @@ namespace Agile.Diagnostics.Logging
         public static string GetStandardFormatMessage(string message, LogLevel level, LogCategory category)
         {
             var cat = (category != null) ? category.Abbreviation ?? string.Empty : string.Empty;
-            return string.Format("{2} [{1}:{3}] {0}"
-                , message ?? string.Empty
-                , level.ToString().PadLeft(5, ' ')
-                , GetDateString(DateTime.Now)
-                , cat); // can't add Thread Id because not availabel in Portable (well, can if really want, but in a version that is not part of a pcl.)
+            var thread = GetCurrentManagedThreadId();
+
+            return string.Format("{2} [{1}:{3}{4}] {0}",
+                message ?? string.Empty,
+                level.ToString().PadLeft(5, ' '), 
+                GetDateString(DateTime.Now),
+                cat, 
+                string.IsNullOrEmpty(thread) ? "" : string.Format(" {0}", thread.PadLeft(3, ' '))); // can't add Thread Id because not availabel in Portable (well, can if really want, but in a version that is not part of a pcl.)
         }
 
         public static string GetDateString (DateTime date)
@@ -243,8 +246,28 @@ namespace Agile.Diagnostics.Logging
 
         public static void AddLogger(ILogger logger)
         {
-            if(! AllLoggers.Any(existing => existing.GetType().Name == logger.GetType().Name))
+            if(AllLoggers.All(existing => existing.GetType().Name != logger.GetType().Name))
                 AllLoggers.Add(logger);
+        }
+
+        public static string GetCurrentManagedThreadId()
+        {
+
+#if MOBILE
+            return string.Empty;
+#else
+            try
+            {
+                
+                return Thread.CurrentThread.ManagedThreadId.ToString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return string.Empty;
+            }
+#endif
+
         }
     }    
 }
