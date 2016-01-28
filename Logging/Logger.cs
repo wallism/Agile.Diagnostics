@@ -161,6 +161,7 @@ namespace Agile.Diagnostics.Logging
             Error(ex, string.Empty);
         }
 
+
         public static void Error(Exception ex, string extraMessage, params object[] args)
         {
             if (ex == null)
@@ -171,6 +172,8 @@ namespace Agile.Diagnostics.Logging
                 , args);
                 return;
             }
+            ProcessExtraExceptionActions(ex);
+
             var exTypeName = ex.GetType().Name;
             var message = ex.Message;
             var stack = string.IsNullOrEmpty(ex.StackTrace)
@@ -184,6 +187,31 @@ namespace Agile.Diagnostics.Logging
             // now log all inner exceptions
             if(ex.InnerException != null)
                 LogInnerExceptions(ex.InnerException, 1);
+        }
+
+        public static void AddExceptionAction(Action<Exception> action)
+        {
+            if(!extraExceptionActions.Contains(action))
+                extraExceptionActions.Add(action);
+        }
+
+        private static readonly List<Action<Exception>> extraExceptionActions = new List<Action<Exception>>(); 
+        private static void ProcessExtraExceptionActions(Exception exception)
+        {
+            if(!extraExceptionActions.Any())
+                return;
+
+            foreach (var action in extraExceptionActions)
+            {
+                try
+                {
+                    action(exception);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                }
+            }
         }
 
         private static void LogInnerExceptions(Exception ex, int count)
