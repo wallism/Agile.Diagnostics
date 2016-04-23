@@ -187,6 +187,7 @@ namespace Agile.Diagnostics.Logging
             // now log all inner exceptions
             if(ex.InnerException != null)
                 LogInnerExceptions(ex.InnerException, 1);
+
         }
 
         public static void AddExceptionAction(Action<Exception> action)
