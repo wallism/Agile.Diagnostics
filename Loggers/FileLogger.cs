@@ -103,13 +103,13 @@ namespace Agile.Diagnostics.Loggers
         /// <summary>
         /// Output the text to the console.
         /// </summary>
-        public void Write(string message, LogLevel level, LogCategory category, Type exType = null)
+        public void Write(string message, LogLevel level, LogCategory category, Type exType = null, int threadId = 0)
         {
             // stop trying to write if we've had more than 2 exceptions
             if (exceptionCount > 2)
                 return;
 
-            var standardMessage = Logger.GetStandardFormatMessage(message, level, category);
+            var standardMessage = Logger.GetStandardFormatMessage(message, level, category, threadId);
             // also append a new line to ensure log events always start on a new line
             standardMessage = string.Format("{0}\r\n", standardMessage);
             try

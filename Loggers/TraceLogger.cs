@@ -13,9 +13,9 @@ namespace Agile.Diagnostics.Loggers
         /// <summary>
         /// Output the text to the console.
         /// </summary>
-        public void Write(string message, LogLevel level, LogCategory category, Type exType = null)
+        public void Write(string message, LogLevel level, LogCategory category, Type exType = null, int threadId = 0)
         {
-            var standardMessage = Logger.GetStandardFormatMessage(message, level, category);
+            var standardMessage = Logger.GetStandardFormatMessage(message, level, category, threadId);
             switch (level)
             {
                 case LogLevel.Error:

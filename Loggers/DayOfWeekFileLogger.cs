@@ -44,7 +44,7 @@ namespace Agile.Diagnostics.Loggers
         }
 
         private DateTime now;
-        public void Write(string message, LogLevel level, LogCategory category, Type exType = null)
+        public void Write(string message, LogLevel level, LogCategory category, Type exType = null, int threadId = 0)
         {
             now = DateTime.Now;
             // every time we write we need to set the day of week as the App name. (no real need to include the exe name)
@@ -52,7 +52,7 @@ namespace Agile.Diagnostics.Loggers
 
             ClearLogWhenNeeded();
             // then just pass through the job of writing to the file to the file logger.
-            FileLogger.Write(message, level, category);
+            FileLogger.Write(message, level, category, null, threadId);
         }
 
         /// <summary>

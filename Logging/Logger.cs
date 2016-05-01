@@ -7,8 +7,56 @@ using System.Linq;
 
 namespace Agile.Diagnostics.Logging
 {
-    public static class Logger
+    public static partial class Logger
     {
+        static Logger()
+        {
+            // Default loggers so logging works without any initializaton
+            InitializeDefaults();
+        }
+
+        public static void InitializeDefaults()
+        {
+            InitializeLogging(new List<ILogger>
+                                {
+                                    new DebugLogger()
+                                }, LogLevel.All);
+        }
+
+        public static bool HasInitializeBeenCalled { get; set; }
+        public static bool IsBackgroundProcessingStarted { get; set; }
+
+        public static void InitializeLogging(List<ILogger> loggers, LogLevel includedLogLevels, bool logCount = true)
+        {
+            HasInitializeBeenCalled = true;
+            AllLoggers.Clear();
+            AllLoggers.AddRange(loggers);
+            IncludedLogs = includedLogLevels;
+            if (logCount)
+                Debug("{0} Loggers Initialized", loggers.Count);
+
+            StartBackgroundLogging();
+        }
+
+
+        public static void InitializeLogging(ILogger logger, LogLevel includedLogLevels)
+        {
+            AllLoggers.Clear();
+            AllLoggers.Add(logger);
+            IncludedLogs = includedLogLevels;
+
+            StartBackgroundLogging();
+        }
+
+        /// <summary>
+        /// background logging implemented where available (not yet in mobile...and doesn't matter so much prob)
+        /// </summary>
+        static partial void StartBackgroundLogging();
+
+        static partial void WriteQueued(string message, LogLevel level, LogCategory category, Type errorType, params object[] args);
+        
+        private static bool IsQueued { get; set; }
+
         private static string dateFormat;
         public static string DateFormat 
         {
@@ -23,17 +71,17 @@ namespace Agile.Diagnostics.Logging
         public const string DateOnlyFormat = "yyyy-MMM-dd";
         public const string TimeOnlyFormat = "hh:mm:ss:fff";
 
-        public static string GetStandardFormatMessage(string message, LogLevel level, LogCategory category)
+        public static string GetStandardFormatMessage(string message, LogLevel level, LogCategory category, int threadId)
         {
             var cat = (category != null) ? category.Abbreviation ?? string.Empty : string.Empty;
-            var thread = GetCurrentManagedThreadId();
+            var thread = threadId.ToString();
 
             return string.Format("{2} [{1}:{3}{4}] {0}",
                 message ?? string.Empty,
                 level.ToString().PadLeft(5, ' '), 
                 GetDateString(DateTime.Now),
-                cat, 
-                string.IsNullOrEmpty(thread) ? "" : string.Format(" {0}", thread.PadLeft(3, ' '))); // can't add Thread Id because not availabel in Portable (well, can if really want, but in a version that is not part of a pcl.)
+                cat,
+                string.IsNullOrEmpty(thread) ? "" : string.Format(" {0}", thread.PadLeft(3, ' ')));
         }
 
         public static string GetDateString (DateTime date)
@@ -49,21 +97,16 @@ namespace Agile.Diagnostics.Logging
         /// </summary>
         public static LogLevel IncludedLogs { get; set; }
 
-        static Logger()
-        {
-            // Default loggers so logging works without any initializaton
-            InitializeDefaults();
-        }
-
-        public static void InitializeDefaults()
-        {
-            InitializeLogging(new List<ILogger>
-                                {
-                                    new DebugLogger()
-                                }, LogLevel.All);
-        }
 
         private static void Write(string message, LogLevel level, LogCategory category, Type errorType, params object[] args)
+        {
+            if(IsQueued)
+                WriteQueued(message, level, category, errorType, args);
+            else
+                WriteLog(message, level, category, errorType, GetCurrentManagedThreadId(), args);
+        }
+
+        private static void WriteLog(string message, LogLevel level, LogCategory category, Type errorType, int threadId, object[] args)
         {
             if ((IncludedLogs & level) == level)
             {
@@ -72,7 +115,7 @@ namespace Agile.Diagnostics.Logging
                     try
                     {
                         var logger = AllLoggers[i];
-                        logger.Write(string.Format(message, args), level, category, errorType);
+                        logger.Write(string.Format(message, args), level, category, errorType, threadId);
                     }
                     catch (FormatException fx)
                     {
@@ -87,24 +130,6 @@ namespace Agile.Diagnostics.Logging
             }
         }
 
-        public static void InitializeLogging(ILogger logger, LogLevel includedLogLevels)
-        {
-            AllLoggers.Clear();
-            AllLoggers.Add(logger);
-            IncludedLogs = includedLogLevels;
-        }
-
-        public static bool HasInitializeBeenCalled { get; set; }
-
-        public static void InitializeLogging(List<ILogger> loggers, LogLevel includedLogLevels, bool logCount = true)
-        {
-            HasInitializeBeenCalled = true;
-            AllLoggers.Clear();
-            AllLoggers.AddRange(loggers);
-            IncludedLogs = includedLogLevels;
-            if(logCount)
-                Debug("{0} Loggers Initialized", loggers.Count);
-        }
 
         public static void Debug(string message, params object[] args)
         {
@@ -279,21 +304,21 @@ namespace Agile.Diagnostics.Logging
                 AllLoggers.Add(logger);
         }
 
-        public static string GetCurrentManagedThreadId()
+        public static int GetCurrentManagedThreadId()
         {
 
 #if MOBILE
-            return string.Empty;
+            return 0;
 #else
             try
             {
                 
-                return Thread.CurrentThread.ManagedThreadId.ToString();
+                return Thread.CurrentThread.ManagedThreadId;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return string.Empty;
+                return 0;
             }
 #endif
 
