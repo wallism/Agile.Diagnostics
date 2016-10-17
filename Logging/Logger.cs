@@ -19,7 +19,7 @@ namespace Agile.Diagnostics.Logging
         {
             InitializeLogging(new List<ILogger>
                                 {
-                                    new DebugLogger()
+                                    new ConsoleLogger()
                                 }, LogLevel.All);
         }
 
