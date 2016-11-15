@@ -46,5 +46,19 @@
                 return exception;
             }
         }
+
+        private static LogCategory console;
+        /// <summary>
+        /// Gets the console category
+        /// </summary>
+        public static LogCategory Console
+        {
+            get
+            {
+                if (console == null)
+                    console = new LogCategory { Name = "Console", Abbreviation = "CSL" };
+                return console;
+            }
+        }
     }
 }
