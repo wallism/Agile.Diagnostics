@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agile.Diagnostics", "Agile.Diagnostics.csproj", "{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Build|Any CPU = Build|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		PROD|Any CPU = PROD|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.Build|Any CPU.ActiveCfg = Build|Any CPU
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.Build|Any CPU.Build.0 = Build|Any CPU
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.PROD|Any CPU.ActiveCfg = PROD|Any CPU
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.PROD|Any CPU.Build.0 = PROD|Any CPU
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFD72DBA-BFF0-4CB5-92C8-308C877D78B1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
